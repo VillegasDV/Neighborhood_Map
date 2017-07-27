@@ -103,8 +103,8 @@ function initMap() {
 var ViewModel = function() {
     var self = this;
 
-    this.searchText = ko.observable('');
-    this.allLocations = [];
+    self.searchText = ko.observable('');
+    self.allLocations = [];
 
     // create LocationMarker object for each location from main location list (hardcoded)
     // add each location to alllocations array
@@ -118,7 +118,7 @@ var ViewModel = function() {
     // computed observable which contains an array of locations that
     // are currently visible depending on search filter, this list is
     /// what is displayed on the main UI
-    this.visibleLocations = ko.computed(function() {
+    self.visibleLocations = ko.computed(function() {
         var searchFilter = self.searchText().toLowerCase();
 
         // If searching, then check each location to see if
@@ -131,13 +131,8 @@ var ViewModel = function() {
                 var str = location.title.toLowerCase();
                 var result = str.includes(searchFilter);
                 
-                // Show hide marker from map
-                if (result) {
-                    location.marker.setMap(map);
-                }
-                else {
-                    location.marker.setMap(null);
-                }
+                // Show hide marker from map                
+                location.marker.setVisible(result);
                 
                 return result;
             });
@@ -148,6 +143,7 @@ var ViewModel = function() {
             // with all locations
             self.allLocations.forEach(function(location) {
                 location.marker.setMap(map);
+                location.marker.setVisible(true);
             });
 
             // Return location array
@@ -166,8 +162,8 @@ var ViewModel = function() {
 */
 var LocationMarker = function(curr_location) {
     var self = this;
-    this.title = curr_location.title;
-    this.position = curr_location.location;
+    self.title = curr_location.title;
+    self.position = curr_location.location;
 
     // Style the markers a bit. This will be our listing marker icon.
     var defaultIcon = makeMarkerIcon('0091ff');
@@ -177,9 +173,9 @@ var LocationMarker = function(curr_location) {
     var highlightedIcon = makeMarkerIcon('FFFF00');
 
     // Create a Google marker object for this location
-    this.marker = new google.maps.Marker({
-        position: this.position,
-        title: this.title,
+    self.marker = new google.maps.Marker({
+        position: self.position,
+        title: self.title,
         icon: defaultIcon,
         animation: google.maps.Animation.DROP
     });    
@@ -188,33 +184,47 @@ var LocationMarker = function(curr_location) {
     bounds.extend(self.marker.position); 
     
     // Create onclick event listener which will open an infowindow for this specific marker/location
-    this.marker.addListener('click', function() {
+    self.marker.addListener('click', function() {
         // Call function to populate infowindow div with marker data
         populateInfoWindow(self, largeInfoWindow);
 
         // Make marker bounce
-        toggleBounce(this);
+        self.toggleBounce();
 
         // Pan to this marker
-        map.panTo(this.getPosition());
+        map.panTo(self.getPosition());
     });
 
     // Two event listeners - one for mouseover, one for mouseout,
     // to change the colors back and forth.
-    this.marker.addListener('mouseover', function() {
+    self.marker.addListener('mouseover', function() {
         this.setIcon(highlightedIcon);
     });
 
-    this.marker.addListener('mouseout', function() {
+    self.marker.addListener('mouseout', function() {
         this.setIcon(defaultIcon);
     });
 
     // Function that will trigger a click event (used by item list) 
     // wich will trigger the infowindow to open
-    this.viewMarker = function(location) {
-        google.maps.event.trigger(self.marker, 'click');
+    LocationMarker.prototype.viewMarker = function() {
+        var marker = this.marker;
+        google.maps.event.trigger(marker, 'click');
     };
 
+    // Function that will toggle bounce effect
+    LocationMarker.prototype.toggleBounce = function() {
+        var marker = this.marker;
+
+        if (marker.getAnimation() !== null) {
+            marker.setAnimation(null);
+        } else {
+            marker.setAnimation(google.maps.Animation.BOUNCE);
+            setTimeout(function() {
+            marker.setAnimation(null);
+            }, 1400);
+        }
+    }    
 };
 
 
@@ -350,22 +360,6 @@ function makeMarkerIcon(markerColor) {
         new google.maps.Point(10, 34),
         new google.maps.Size(21, 34));
     return markerImage;
-}
-
-/**
-* @description Function that animates/bounces a marker
-* @constructor
-* @param {marker} marker - A marker object
-*/
-function toggleBounce(marker) {
-  if (marker.getAnimation() !== null) {
-    marker.setAnimation(null);
-  } else {
-    marker.setAnimation(google.maps.Animation.BOUNCE);
-    setTimeout(function() {
-        marker.setAnimation(null);
-    }, 1200);
-  }
 }
 
 /**
