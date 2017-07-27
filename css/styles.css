@@ -1,0 +1,59 @@
+body {
+    font-family: Arial, sans-serif; 
+}
+
+
+h2 {
+    color: #525454;
+    font-size: 22px;
+    margin: 0 0 10px 0;
+    text-align: center;
+}
+
+input {
+    font-size: 12px;
+}
+
+#left {
+    position: absolute;
+    width:200px;
+    height:100%
+    margin-left:10px;
+    left:10px;
+    background-color: white;
+    padding: 5px;
+}
+
+.disclaimer {
+    font-size: 10px;
+}
+
+#loc_list_div.in,
+#loc_list_div.collapsing {
+    display: block!important;
+}
+
+#map {
+    margin: 0;
+    position: absolute;
+    left: 0px;
+    top: 50px;
+    bottom: 0px;
+    right: 0px;
+    z-index: -4;
+}
+
+#pano {
+    width: 200px;
+    height: 200px;
+}
+
+.list-group-item:focus {
+    color: #fff;
+    border-color: gray;
+}
+
+.list-group-item:hover {
+    color: #f5f5f5;
+    background-color: gray;
+}
